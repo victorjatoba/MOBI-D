@@ -53,25 +53,19 @@ public class EdgeConnectListener implements mxIEventListener {
 
 	public EdgeConnectListener(MobiDGui mobiDGui) {
 		this.mobiDGui = mobiDGui;
-		this.graph = mobiDGui.getGraph();
-		this.graphComponent = mobiDGui.getGraphComponent();
-		this.genericRelation = mobiDGui.getGenericRelation();
-
-		this.mobi = mobiDGui.getMobi();
-		this.txtRelationA = mobiDGui.getTxtRelationA();
-		this.txtRelationB = mobiDGui.getTxtRelationB();
-		this.txtClassA = mobiDGui.getTxtClassA();
-		this.txtClassB = mobiDGui.getTxtClassB();
+		
 	}
 
 	@Override
 	public void invoke(Object sender, mxEventObject event) {
 
+		getAndSetMobiDComponents();
+		
 		genericRelation = getGenericRelationIntoMobi();
 
 		if (genericRelation == null) {
 			genericRelation = (GenericRelation) mobi
-					.createGenericRelation("genericRelation");
+					.createGenericRelation(txtRelationA.getText());
 			System.out.println("EdgeConnectListener| "
 					+ genericRelation.getName() + " is successfully created");
 		} else {
@@ -91,6 +85,8 @@ public class EdgeConnectListener implements mxIEventListener {
 
 			}
 
+		} else {
+			System.out.println("genericRelation.getClassA() exit! -> " + genericRelation.getClassA());
 		}
 
 		if (genericRelation.getClassB() == null) {
@@ -105,6 +101,8 @@ public class EdgeConnectListener implements mxIEventListener {
 				System.out.println("EdgeConnectListener: Erro! ClassB is null");
 
 			}
+		} else {
+			System.out.println("genericRelation.getClassB() exit! -> " + genericRelation.getClassB());
 		}
 
 		mxCell edge = (mxCell) event.getProperty("cell");
@@ -137,21 +135,21 @@ public class EdgeConnectListener implements mxIEventListener {
 			if(!possibilities.isEmpty()) {
 //				if(possibilities.contains(genericRelation.EQUIVALENCE)) {
 //					System.out.println("Equivalence");
-				if(possibilities.contains(genericRelation.INHERITANCE)) {
+				if(possibilities.contains(Relation.BIDIRECIONAL_COMPOSITION)) { //Preferred choice
+					CompositionRelation composition = (CompositionRelation)mobi.convertToBidirecionalCompositionRelationship(genericRelation, txtRelationA.getText(), txtRelationB.getText());				
+					mobi.addConcept(composition);
+					radioButtonTypeRelation = mobiDGui.getRdbtnComposition();
+					System.out.println("composition");
+				} else if(possibilities.contains(Relation.INHERITANCE)) {
 					InheritanceRelation inheritanceRelation = (InheritanceRelation) mobi.convertToInheritanceRelation(genericRelation,"inheritance");
 					mobi.addConcept(inheritanceRelation);
 					radioButtonTypeRelation = mobiDGui.getRdbtnInheritance();
 					System.out.println("Inheritance");
-				} else if(possibilities.contains(genericRelation.SYMMETRIC_COMPOSITION)) {
+				} else if(possibilities.contains(Relation.SYMMETRIC_COMPOSITION)) {
 					SymmetricRelation symmetric = (SymmetricRelation) mobi.convertToSymmetricRelation(genericRelation, "simetrico");
 					mobi.addConcept(symmetric);
 					radioButtonTypeRelation = mobiDGui.getRdbtnEquivalence();
 					System.out.println("symetric");
-				} else if(possibilities.contains(genericRelation.BIDIRECIONAL_COMPOSITION)) {
-					CompositionRelation composition = (CompositionRelation)mobi.convertToBidirecionalCompositionRelationship(genericRelation, "tem", "pertence");				
-					mobi.addConcept(composition);
-					radioButtonTypeRelation = mobiDGui.getRdbtnComposition();
-					System.out.println("composition");
 				}
 			} else {
 				radioButtonTypeRelation = null;
@@ -167,10 +165,30 @@ public class EdgeConnectListener implements mxIEventListener {
 			for(Integer i: possibilities) {
 				System.out.println(i.toString());
 			}
+
+			/* Generate OWL
+			 * */
+			Mobi2OWL mobi2OWL = new Mobi2OWL("http://www.mobi.org/", mobi);
+			mobi2OWL.setExportPath("C:\\BaseOntologia");
+			mobi2OWL.exportMobiToOWL("TestOntology.owl");
+			
+			System.out.println("OWL Successfull created!");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void getAndSetMobiDComponents() {
+		this.graph = mobiDGui.getGraph();
+		this.graphComponent = mobiDGui.getGraphComponent();
+		this.genericRelation = mobiDGui.getGenericRelation();
+
+		this.mobi = mobiDGui.getMobi();
+		this.txtRelationA = mobiDGui.getTxtRelationA();
+		this.txtRelationB = mobiDGui.getTxtRelationB();
+		this.txtClassA = mobiDGui.getTxtClassA();
+		this.txtClassB = mobiDGui.getTxtClassB();		
 	}
 
 	private void deselectOthersTypeRelationField(JRadioButton rdbtn) {
@@ -229,8 +247,9 @@ public class EdgeConnectListener implements mxIEventListener {
 		// System.out.println(mobiGenericRelations);
 		for (String key : mobiGenericRelations.keySet()) {
 			GenericRelation value = mobiGenericRelations.get(key);
-			if (value.getUri() == "genericRelation") {
+			if (value.getUri().equals(txtRelationA.getText())) {
 				genericRelationFound = value;
+				System.out.println(txtRelationA.getText() + "was found");
 				break;
 			}
 		}

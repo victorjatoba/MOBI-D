@@ -1,11 +1,15 @@
-Mobi-D ver.: 2.1.0
+Mobi-D ver.: 2.1.1
 By: Victor Jatobá
 Date: 21/02/2013 - 01:56
 -------------------------
 
 Alterations:
 
-- relation type is inflicted and marked on the screen field when instances are connected
+- the Relationship name can getter. The getAndSetMobiDComponents() method was created
+
+- getGenericRelationIntoMobi() now is functionality correctly
+
+- BIDIRECIONAL_COMPOSITION is Preferred choice
 
 Make on the next versions:
 
