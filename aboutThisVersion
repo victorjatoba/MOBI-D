@@ -1,0 +1,18 @@
+Mobi-D ver.: 2.1.0
+By: Victor Jatobá
+Date: 21/02/2013 - 01:56
+-------------------------
+
+Alterations:
+
+- relation type is inflicted and marked on the screen field when instances are connected
+
+Make on the next versions:
+
+- implement listener for the GenerateOWL button
+
+- Study the Mobi inference
+
+- organize the inference and decided the order of marking 
+
+- not insert instances duplicated checking for kernel.
